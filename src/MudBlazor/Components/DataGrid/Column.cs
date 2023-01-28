@@ -92,7 +92,9 @@ namespace MudBlazor
         }
 
         [Parameter] public SortDirection InitialDirection { get; set; } = SortDirection.None;
-        [Parameter] public string SortIcon { get; set; } = Icons.Material.Filled.ArrowUpward;
+        [Parameter] public string SortIcon { get; set; }
+        [Parameter] public string FilterIcon { get; set; }
+        [Parameter] public string FilterAppliedIcon { get; set; }
 
         /// <summary>
         /// Specifies whether the column can be grouped.
@@ -269,6 +271,10 @@ namespace MudBlazor
         [UnconditionalSuppressMessage("Trimming", "IL2046: 'RequiresUnreferencedCodeAttribute' annotations must match across all interface implementations or overrides.", Justification = "Suppressing because we annotating the whole component with RequiresUnreferencedCodeAttribute for information that generic type must be preserved.")]
         protected override void OnInitialized()
         {
+            SortIcon ??= DataGrid.SortIcon ?? Icons.Material.Filled.ArrowUpward;
+            FilterIcon ??= DataGrid.FilterIcon ?? Icons.Material.Outlined.FilterAlt;
+            FilterAppliedIcon ??= DataGrid.FilterAppliedIcon ?? Icons.Material.Filled.FilterAlt;
+
             if (!Hideable.HasValue)
                 Hideable = DataGrid?.Hideable;
 
