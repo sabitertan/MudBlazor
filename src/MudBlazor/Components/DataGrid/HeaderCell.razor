@@ -57,7 +57,7 @@ else if (Column != null && !Column.Hidden)
                 {
                     if (hasFilter)
                     {
-                        <MudIconButton Class="filter-button filtered" Icon="@(Column.FilterAppliedIcon ?? Column.FilterIcon)" Size="@Size.Small" OnClick="@OpenFilters"></MudIconButton>
+                        <MudIconButton Class="filter-button filtered" Icon="@(Column.FilterAppliedIcon)" Size="@Size.Small" OnClick="@OpenFilters"></MudIconButton>
                     }
                     else if (showFilterIcon)
                     {

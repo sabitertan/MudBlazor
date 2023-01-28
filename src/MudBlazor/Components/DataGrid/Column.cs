@@ -271,9 +271,9 @@ namespace MudBlazor
         [UnconditionalSuppressMessage("Trimming", "IL2046: 'RequiresUnreferencedCodeAttribute' annotations must match across all interface implementations or overrides.", Justification = "Suppressing because we annotating the whole component with RequiresUnreferencedCodeAttribute for information that generic type must be preserved.")]
         protected override void OnInitialized()
         {
-            SortIcon ??= DataGrid.SortIcon ?? Icons.Material.Filled.ArrowUpward;
-            FilterIcon ??= DataGrid.FilterIcon ?? Icons.Material.Outlined.FilterAlt;
-            FilterAppliedIcon ??= DataGrid.FilterAppliedIcon ?? Icons.Material.Filled.FilterAlt;
+            SortIcon ??= DataGrid?.SortIcon ?? Icons.Material.Filled.ArrowUpward;
+            FilterIcon ??= DataGrid?.FilterIcon ?? Icons.Material.Outlined.FilterAlt;
+            FilterAppliedIcon ??= DataGrid?.FilterAppliedIcon ?? Icons.Material.Filled.FilterAlt;
 
             if (!Hideable.HasValue)
                 Hideable = DataGrid?.Hideable;
