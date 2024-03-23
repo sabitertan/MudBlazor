@@ -49,6 +49,18 @@ namespace MudBlazor
             return Task.CompletedTask;
         }
 
+        protected override Task UpdateTextPropertyAsync(bool updateValue)
+        {
+            var suppressTextUpdate = !updateValue
+                                     && DebounceInterval > 0
+                                     && _timer is { Enabled: true }
+                                     && (!Value?.Equals(Converter.Get(Text)) ?? false);
+
+            return suppressTextUpdate
+                ? Task.CompletedTask
+                : base.UpdateTextPropertyAsync(updateValue);
+        }
+
         protected override Task UpdateValuePropertyAsync(bool updateText)
         {
             // This method is called when Value property needs to be refreshed from the current Text property, so typically because Text property has changed.

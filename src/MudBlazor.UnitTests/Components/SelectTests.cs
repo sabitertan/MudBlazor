@@ -30,6 +30,18 @@ namespace MudBlazor.UnitTests.Components
             comp.WaitForAssertion(() => comp.Markup.Should().Contain("my-list-class"));
         }
 
+        [Test]
+        public async Task SelectTest_CheckLayerClass()
+        {
+            var comp = Context.RenderComponent<MudSelect<string>>();
+            await comp.InvokeAsync(() => comp.SetParam("OuterClass", "my-outer-class"));
+            await comp.InvokeAsync(() => comp.SetParam("Class", "my-main-class"));
+            await comp.InvokeAsync(() => comp.SetParam("InputClass", "my-input-class"));
+            comp.WaitForAssertion(() => comp.Markup.Should().Contain("my-outer-class"));
+            comp.WaitForAssertion(() => comp.Markup.Should().Contain("my-main-class"));
+            comp.WaitForAssertion(() => comp.Markup.Should().Contain("my-input-class"));
+        }
+
         /// <summary>
         /// Select id should propagate to label for attribute
         /// </summary>
@@ -78,9 +90,9 @@ namespace MudBlazor.UnitTests.Components
             comp.WaitForAssertion(() => select.Instance.Value.Should().Be("1"));
             //Check user on blur implementation works
             var @switch = comp.FindComponent<MudSwitch<bool>>();
-            @switch.Instance.Checked = true;
-            await comp.InvokeAsync(() => select.Instance.OnLostFocus(new FocusEventArgs()));
-            comp.WaitForAssertion(() => @switch.Instance.Checked.Should().Be(false));
+            @switch.Instance.Value = true;
+            await comp.InvokeAsync(() => select.Instance.OnBlurAsync(new FocusEventArgs()));
+            comp.WaitForAssertion(() => @switch.Instance.Value.Should().Be(false));
         }
 
         /// <summary>
@@ -325,7 +337,7 @@ namespace MudBlazor.UnitTests.Components
             string.Join(",", selectedValues).Should().Be("2");
 
             input.Click();
-            comp.WaitForAssertion(()=>comp.FindAll("div.mud-list-item").Count.Should().BeGreaterThan(0));
+            comp.WaitForAssertion(() => comp.FindAll("div.mud-list-item").Count.Should().BeGreaterThan(0));
             items = comp.FindAll("div.mud-list-item").ToArray();
 
             items[0].Click();
@@ -502,7 +514,7 @@ namespace MudBlazor.UnitTests.Components
             selectAllItem.Instance.Icon.Should().Be("<path d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\"/>");
 
             // Check that all normal select items are actually selected
-            var items = comp.FindComponents<MudSelectItem<string>>().Where(x=>x.Instance.HideContent==false).ToArray();
+            var items = comp.FindComponents<MudSelectItem<string>>().Where(x => x.Instance.HideContent == false).ToArray();
 
             items.Should().HaveCount(7);
             foreach (var item in items)
@@ -556,7 +568,7 @@ namespace MudBlazor.UnitTests.Components
             input.Click();
             menu.ClassList.Should().Contain("mud-popover-open");
             // now click an item and see the value change
-            comp.WaitForAssertion(()=> comp.FindAll("div.mud-list-item").Count.Should().BeGreaterThan(0));
+            comp.WaitForAssertion(() => comp.FindAll("div.mud-list-item").Count.Should().BeGreaterThan(0));
 
             comp.FindAll("div.mud-list-item")[1].Click();
             // menu should be closed now
@@ -776,7 +788,7 @@ namespace MudBlazor.UnitTests.Components
             comp.Find("div.mud-input-control").Click();
             comp.WaitForAssertion(() => comp.Find("div.mud-popover").ClassList.Should().Contain("mud-popover-open"));
             // Nr 2 should be hilited
-            comp.WaitForAssertion(()=>comp.FindAll("div.mud-selected-item").Count.Should().Be(1));
+            comp.WaitForAssertion(() => comp.FindAll("div.mud-selected-item").Count.Should().Be(1));
             comp.FindAll("div.mud-list-item")[1].ToMarkup().Should().Contain("mud-selected-item");
             // now click an item and see the value change
             comp.FindAll("div.mud-list-item")[0].Click();
@@ -994,6 +1006,24 @@ namespace MudBlazor.UnitTests.Components
         }
 
         [Test]
+        public async Task SelectTest_KeyboardNavigation_MultiSelect_Focus()
+        {
+            var comp = Context.RenderComponent<MultiSelectTest6>();
+            var select = comp.FindComponent<MudSelect<string>>();
+            var mudSelectElement = comp.Find(".mud-select");
+            comp.Find("div.mud-input-control").Click();
+            select.Instance._isOpen.Should().BeTrue();
+            var items = comp.FindAll("div.mud-list-item").ToArray();
+            items[0].Click();
+            items[2].Click();
+            //emulate focus out
+            mudSelectElement.FocusOut();
+            comp.WaitForAssertion(() => select.Instance.Text.Should().Be("Alaska, Alabama, American Samoa"));
+            //check if we received focus event from the MudSelect.OnFocusOutAsync
+            Context.JSInterop.VerifyFocusAsyncInvoke();
+        }
+
+        [Test]
         public async Task SelectTest_ItemlessSelect()
         {
             var comp = Context.RenderComponent<MudSelect<string>>();
@@ -1045,6 +1075,33 @@ namespace MudBlazor.UnitTests.Components
             sut.Instance.Items.Should().HaveCountGreaterOrEqualTo(4);
         }
 
+        [Test]
+        public async Task Select_ValueChangeEventCountTest()
+        {
+            var comp = Context.RenderComponent<SelectEventCountTest>(x =>
+            {
+                x.Add(c => c.MultiSelection, false);
+            });
+            var select = comp.FindComponent<MudSelect<string>>();
+            var input = comp.Find("div.mud-input-control");
+
+            comp.Instance.ValueChangeCount.Should().Be(0);
+            comp.Instance.ValuesChangeCount.Should().Be(0);
+
+            await comp.InvokeAsync(() => select.SetParam("Value", "1"));
+            await comp.InvokeAsync(() => select.Instance.ForceUpdate());
+            comp.WaitForAssertion(() => comp.Instance.ValueChangeCount.Should().Be(1));
+            comp.Instance.ValuesChangeCount.Should().Be(1);
+            select.Instance.Value.Should().Be("1");
+
+            // Changing value programmatically without ForceUpdate should change value, but should not fire change events
+            // Its by design, so this part can be change if design changes
+            await comp.InvokeAsync(() => select.SetParam("Value", "2"));
+            comp.WaitForAssertion(() => comp.Instance.ValueChangeCount.Should().Be(1));
+            comp.Instance.ValuesChangeCount.Should().Be(1);
+            select.Instance.Value.Should().Be("2");
+        }
+
         /// <summary>
         /// When MultiSelection and Required are True with no selected values, required validation should fail.
         /// </summary>
@@ -1072,7 +1129,7 @@ namespace MudBlazor.UnitTests.Components
             items[1].Click();
             await comp.InvokeAsync(() => select.Validate());
             select.ValidationErrors.Count.Should().Be(0);
-            
+
             //2b.
             inputs[1].Click();//selectWithT 
             //wait for render and it will find 5 items from the component

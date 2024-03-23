@@ -37,11 +37,11 @@ namespace MudBlazor.Docs
             return theme;
         }
 
-        
+
 
         #region Docs
 
-        private static readonly Palette DocsLightPalette = new()
+        private static readonly PaletteLight DocsLightPalette = new()
         {
             Black = "#110e2d",
             AppbarText = "#424242",
@@ -51,10 +51,10 @@ namespace MudBlazor.Docs
             GrayLighter = "#f9f9f9"
         };
 
-        private static readonly PaletteDark DocsDarkPalette  = new()
+        private static readonly PaletteDark DocsDarkPalette = new()
         {
             Primary = "#7e6fff",
-            Surface= "#1e1e2d",
+            Surface = "#1e1e2d",
             Background = "#1a1a27",
             BackgroundGrey = "#151521",
             AppbarText = "#92929f",
@@ -142,7 +142,7 @@ namespace MudBlazor.Docs
                 TextTransform = "none"
             }
         };
-        private static readonly Palette LandingPageLightPalette = new()
+        private static readonly PaletteLight LandingPageLightPalette = new()
         {
             AppbarText = "#424242",
             AppbarBackground = "rgba(0,0,0,0)",
@@ -159,7 +159,7 @@ namespace MudBlazor.Docs
             AppbarText = "#92929f",
             AppbarBackground = "rgba(0,0,0,0)",
             BackgroundGrey = "#1a1a27",
-            Surface= "#1e1e2d",
+            Surface = "#1e1e2d",
             Background = "#151521",
             Dark = "#111019",
             DarkLighten = "#1A1643",
